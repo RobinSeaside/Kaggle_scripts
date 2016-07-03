@@ -44,7 +44,6 @@ def get_im(path, img_rows, img_cols, color_type=1):
     resized = cv2.resize(img, (img_cols, img_rows))
     # mean_pixel = [103.939, 116.799, 123.68]
     # resized = resized.astype(np.float32, copy=False)
-
     # for c in range(3):
     #    resized[:, :, c] = resized[:, :, c] - mean_pixel[c]
     # resized = resized.transpose((2, 0, 1))
@@ -72,9 +71,9 @@ def load_train(img_rows, img_cols, color_type=1):
     X_train = []
     y_train = []
     driver_id = []
-
+    
     driver_data = get_driver_data()
-
+    
     print('Read train images')
     for j in range(10):
         print('Load folder c{}'.format(j))
@@ -87,7 +86,7 @@ def load_train(img_rows, img_cols, color_type=1):
             X_train.append(img)
             y_train.append(j)
             driver_id.append(driver_data[flbase])
-
+            
     unique_drivers = sorted(list(set(driver_id)))
     print('Unique drivers: {}'.format(len(unique_drivers)))
     print(unique_drivers)
@@ -110,7 +109,7 @@ def load_test(img_rows, img_cols, color_type=1):
         total += 1
         if total % thr == 0:
             print('Read {} images from {}'.format(total, len(files)))
-
+            
     return X_test, X_test_id
 
 
@@ -176,11 +175,11 @@ def create_submission(predictions, test_id, info):
 
 def read_and_normalize_and_shuffle_train_data(img_rows, img_cols,
                                               color_type=1):
-
+                                                
     cache_path = os.path.join('cache', 'train_r_' + str(img_rows) +
                               '_c_' + str(img_cols) + '_t_' +
                               str(color_type) + '.dat')
-
+                              
     if not os.path.isfile(cache_path) or use_cache == 0:
         train_data, train_target, driver_id, unique_drivers = \
             load_train(img_rows, img_cols, color_type)
@@ -190,16 +189,13 @@ def read_and_normalize_and_shuffle_train_data(img_rows, img_cols,
         print('Restore train from cache!')
         (train_data, train_target, driver_id, unique_drivers) = \
             restore_data(cache_path)
-
+            
     train_data = np.array(train_data, dtype=np.uint8)
     train_target = np.array(train_target, dtype=np.uint8)
-
-    if color_type == 1:
-        train_data = train_data.reshape(train_data.shape[0], color_type,
+    
+    train_data = train_data.reshape(train_data.shape[0], color_type,
                                         img_rows, img_cols)
-    else:
-        train_data = train_data.transpose((0, 3, 1, 2))
-
+                                        
     train_target = np_utils.to_categorical(train_target, 10)
     train_data = train_data.astype('float32')
     mean_pixel = [103.939, 116.779, 123.68]
@@ -224,15 +220,15 @@ def read_and_normalize_test_data(img_rows=224, img_cols=224, color_type=1):
     else:
         print('Restore test from cache!')
         (test_data, test_id) = restore_data(cache_path)
-
+        
     test_data = np.array(test_data, dtype=np.uint8)
-
+    
     if color_type == 1:
         test_data = test_data.reshape(test_data.shape[0], color_type,
                                       img_rows, img_cols)
     else:
         test_data = test_data.transpose((0, 3, 1, 2))
-
+        
     test_data = test_data.astype('float32')
     mean_pixel = [103.939, 116.779, 123.68]
     for c in range(3):
@@ -289,13 +285,13 @@ def vgg_std16_model(img_rows, img_cols, color_type=1):
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(64, 3, 3, activation='relu'))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
+    
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(128, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(128, 3, 3, activation='relu'))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
+    
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(256, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
@@ -303,7 +299,7 @@ def vgg_std16_model(img_rows, img_cols, color_type=1):
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(256, 3, 3, activation='relu'))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
+    
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(512, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
@@ -311,7 +307,7 @@ def vgg_std16_model(img_rows, img_cols, color_type=1):
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(512, 3, 3, activation='relu'))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
+    
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(512, 3, 3, activation='relu'))
     model.add(ZeroPadding2D((1, 1)))
@@ -319,16 +315,16 @@ def vgg_std16_model(img_rows, img_cols, color_type=1):
     model.add(ZeroPadding2D((1, 1)))
     model.add(Convolution2D(512, 3, 3, activation='relu'))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
+    
     model.add(Flatten())
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(4096, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(1000, activation='softmax'))
-
+    
     model.load_weights('../input/vgg16_weights.h5')
-
+    
     # Code above loads pre-trained data and
     model.layers.pop()
     model.add(Dense(10, activation='softmax'))
@@ -339,13 +335,12 @@ def vgg_std16_model(img_rows, img_cols, color_type=1):
 
 
 def run_cross_validation(nfolds=10, nb_epoch=10, split=0.2, modelStr=''):
-
     # Now it loads color image
     # input image dimensions
     img_rows, img_cols = 224, 224
     batch_size = 64
     random_state = 20
-
+    
     train_data, train_target, driver_id, unique_drivers = \
         read_and_normalize_and_shuffle_train_data(img_rows, img_cols,
                                                   color_type_global)
@@ -373,43 +368,40 @@ def run_cross_validation(nfolds=10, nb_epoch=10, split=0.2, modelStr=''):
         # model = create_model_v1(img_rows, img_cols, color_type_global)
         # model = vgg_bn_model(img_rows, img_cols, color_type_global)
         model = vgg_std16_model(img_rows, img_cols, color_type_global)
-
+        
         model.fit(train_data, train_target, batch_size=batch_size,
                   nb_epoch=nb_epoch,
                   show_accuracy=True, verbose=1,
                   validation_split=split, shuffle=True)
-
         # print('losses: ' + hist.history.losses[-1])
-
         # print('Score log_loss: ', score[0])
-
         save_model(model, num_fold, modelStr)
-
+        
         # predictions_valid = model.predict(X_valid, batch_size=128, verbose=1)
         # score = log_loss(Y_valid, predictions_valid)
         # print('Score log_loss: ', score)
         # Store valid predictions
         # for i in range(len(test_index)):
         #    yfull_train[test_index[i]] = predictions_valid[i]
-
+        
     print('Start testing............')
     test_data, test_id = read_and_normalize_test_data(img_rows, img_cols,
                                                       color_type_global)
     yfull_test = []
-
+    
     for index in range(1, num_fold + 1):
         # 1,2,3,4,5
         # Store test predictions
         model = read_model(index, modelStr)
         test_prediction = model.predict(test_data, batch_size=128, verbose=1)
         yfull_test.append(test_prediction)
-
+        
     info_string = 'loss_' + modelStr \
                   + '_r_' + str(img_rows) \
                   + '_c_' + str(img_cols) \
                   + '_folds_' + str(nfolds) \
                   + '_ep_' + str(nb_epoch)
-
+                  
     test_res = merge_several_folds_mean(yfull_test, nfolds)
     create_submission(test_res, test_id, info_string)
 
@@ -419,27 +411,27 @@ def test_model_and_submit(start=1, end=1, modelStr=''):
     # batch_size = 64
     # random_state = 51
     nb_epoch = 15
-
+    
     print('Start testing............')
     test_data, test_id = read_and_normalize_test_data(img_rows, img_cols,
                                                       color_type_global)
     yfull_test = []
-
+    
     for index in range(start, end + 1):
         # Store test predictions
         model = read_model(index, modelStr)
         test_prediction = model.predict(test_data, batch_size=128, verbose=1)
         yfull_test.append(test_prediction)
-
+        
     info_string = 'loss_' + modelStr \
                   + '_r_' + str(img_rows) \
                   + '_c_' + str(img_cols) \
                   + '_folds_' + str(end - start + 1) \
                   + '_ep_' + str(nb_epoch)
-
+                  
     test_res = merge_several_folds_mean(yfull_test, end - start + 1)
     create_submission(test_res, test_id, info_string)
-
+    
 # nfolds, nb_epoch, split
 run_cross_validation(2, 20, 0.15, '_vgg_16_2x20')
 
