@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-import sys
-import timeit
 import numpy as np
 
 import os
