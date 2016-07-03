@@ -39,7 +39,7 @@ def load_train_cv(encoder):
     print('Read train images')
     for j in range(10):
         print('Load folder c{}'.format(j))
-        path = os.path.join('F:\Projects\state_farm_distracted_driver_detection','input', 'imgs', 'train', 'c' + str(j), '*.jpg')
+        path = os.path.join('..','input', 'imgs', 'train', 'c' + str(j), '*.jpg')
         files = glob.glob(path)
         for fl in files:
             img = cv2.imread(fl,0)
@@ -65,7 +65,7 @@ def load_train_cv(encoder):
 
 def load_test():
     print('Read test images')
-    path = os.path.join('F:\Projects\state_farm_distracted_driver_detection', 'input', 'imgs', 'test', '*.jpg')
+    path = os.path.join('..', 'input', 'imgs', 'test', '*.jpg')
     files = glob.glob(path)
     X_test = []
     X_test_id = []
